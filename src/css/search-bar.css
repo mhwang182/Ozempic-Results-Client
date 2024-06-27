@@ -1,0 +1,21 @@
+/* .search-bar-enter {
+    transform: translateX(-100%);
+} */
+
+.search-bar-enter-active {
+    transform: translateX(0%);
+    transition: transform 300ms ease-in-out;
+}
+
+.search-bar-enter-done {
+    transform: translateX(0%);
+}
+
+.search-bar-exit {
+    transform: translateX(0%);
+}
+
+.search-bar-exit-active {
+    transform: translateX(-100%);
+    transition: transform 300ms ease-in-out;
+}

@@ -3,13 +3,28 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { UserAuthContextProvider } from './context/UserAuthContext';
+import { PostsContextProvider } from './context/PostsContext';
+import { BrowserRouter } from 'react-router-dom';
+import { ReviewsContextProvider } from './context/ReviewsContext';
+import { SearchResultContextProvider } from './context/SearchResultContext';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <UserAuthContextProvider>
+        <PostsContextProvider>
+          <ReviewsContextProvider>
+            <SearchResultContextProvider>
+              <App />
+            </SearchResultContextProvider>
+          </ReviewsContextProvider>
+        </PostsContextProvider>
+      </UserAuthContextProvider>
+    </BrowserRouter>
   </React.StrictMode>
 );
 
