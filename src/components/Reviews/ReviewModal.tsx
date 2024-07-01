@@ -1,33 +1,51 @@
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import ModalBackground from "../Common/ModalBackground"
-import { useReviewsContext } from "../../context/ReviewsContext";
+import { loadReviewById, useReviewsContext } from "../../context/ReviewsContext";
 import { useEffect, useState } from "react";
 import { MedicationToTradeName, ReviewData, getDateString } from "../../utils/contants";
 import { Rating } from "react-simple-star-rating";
 import { CloseIcon } from "../../svgs/svgs";
+import LoadingSpinner from "../Common/LoadingSpinner";
 
 const ReviewModal = (props: { onClose: () => void }) => {
 
-    const [reviewData, setReviewData] = useState(undefined as ReviewData | undefined);
     const { id } = useParams();
-    const { findReview, userReviews, feedReviews } = useReviewsContext();
+    const location = useLocation();
+
+    const [reviewData, setReviewData] = useState(undefined as ReviewData | undefined);
+    const [loadingReview, setLoadingReview] = useState(false);
+
 
     const { onClose } = props;
 
     useEffect(() => {
-        if (!id) { return; }
-        const data = findReview(id);
-        console.log(data);
-        setReviewData(data);
-    }, [id, userReviews, feedReviews])
+        const getReview = async () => {
+            if (!id) { return; }
+
+            setLoadingReview(true);
+
+            if (location.state && location.state?.review) {
+                const { review } = location.state;
+                setReviewData(review)
+                setLoadingReview(false);
+                return;
+            }
+
+            const review = await loadReviewById(id);
+            if (review) {
+                setReviewData(review);
+            }
+            setLoadingReview(false);
+        }
+        getReview();
+
+    }, [id])
 
     const ReviewContent = (props: { data: ReviewData }) => {
 
         const { data } = props;
-
-        console.log(data.createdAt);
         return (
-            <div className="flex flex-col space-y-1">
+            <div className="flex flex-col space-y-1 w-full">
                 <div className="flex flex-row justify-between">
                     <h1 className="font-semibold">{MedicationToTradeName[data.medication]} {`(${data.medication})`} Review</h1>
                     <button onClick={onClose}><CloseIcon /></button>
@@ -66,8 +84,29 @@ const ReviewModal = (props: { onClose: () => void }) => {
         <ModalBackground>
             <div className="relative transform overflow-hidden rounded-lg bg-zinc-50 text-left 
                             shadow-xl transition-all sm:mx-auto sm:w-full sm:max-w-[650px] w-full
-                            h-fit mx-5 p-4 max-h-[90vh] overflow-y-scroll">
-                {reviewData && <ReviewContent data={reviewData} />}
+                            h-fit mx-5 p-4 max-h-[90vh] min-h-[250px] overflow-y-scroll flex">
+                <>{loadingReview ?
+                    <div className="m-auto h-20 w-20">
+                        <LoadingSpinner />
+                    </div> :
+                    <>
+                        {reviewData ?
+                            <ReviewContent data={reviewData} /> :
+                            <div className="py-3 flex flex-col space-y-3 items-center rounded-md w-full">
+                                <div className={`w-full px-3 flex flex-row justify-end`}>
+                                    <button
+                                        onClick={onClose}
+                                        className=""
+                                    >
+                                        <CloseIcon />
+                                    </button>
+                                </div>
+                                <div className="font-semibold">Review Not Found</div>
+                            </div>
+                        }
+                    </>
+                }</>
+
             </div>
         </ModalBackground>
     )

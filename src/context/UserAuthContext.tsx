@@ -1,5 +1,5 @@
 import React, { ReactElement, useContext, useReducer } from "react";
-import { apiPost } from "../api/apiClient";
+import { APIMethod, apiCall } from "../api/apiClient";
 import { AxiosError } from "axios";
 import { NewUserDTO, LoginCredentialsDTO } from "../utils/contants";
 
@@ -71,7 +71,7 @@ const UserAuthContextProvider = (props: { children: ReactElement }) => {
         try {
             dispatch({ type: "userLoading" });
 
-            const response = await apiPost("/user/login", {
+            const response = await apiCall(APIMethod.POST, "/user/login", {
                 credentials: data
             });
 
@@ -99,7 +99,7 @@ const UserAuthContextProvider = (props: { children: ReactElement }) => {
     const createUser = async (data: NewUserDTO, signUpCode?: string) => {
         try {
             dispatch({ type: "userLoading" });
-            const response = await apiPost("/user", { user: data, signUpCode });
+            const response = await apiCall(APIMethod.POST, "/user", { user: data, signUpCode });
             dispatch({ type: 'setUser', payload: { token: response.data.token, user: response.data.user } });
         } catch (error) {
             dispatch({ type: "userLoaded" })

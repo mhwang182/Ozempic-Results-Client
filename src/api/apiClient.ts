@@ -7,7 +7,12 @@ export const apiClient = axios.create({
     baseURL: apiBaseURL
 });
 
-export const apiPost = (url: string, data: any, token?: string, contentType?: string) => {
+export enum APIMethod {
+    GET = "get",
+    POST = "post"
+}
+
+export const apiCall = (method: APIMethod, url: string, data?: any, token?: string, contentType?: string) => {
     let headers: { [key: string]: string } = {
         'X-API-KEY': apiKey
     }
@@ -20,7 +25,13 @@ export const apiPost = (url: string, data: any, token?: string, contentType?: st
         headers['Content-Type'] = contentType
     }
 
-    return apiClient.post(url, data, {
+    if (method === APIMethod.GET) {
+        return apiClient[method](url, {
+            headers: headers
+        });
+    }
+
+    return apiClient[method](url, data, {
         headers: headers
     });
 }

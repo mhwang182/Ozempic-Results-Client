@@ -1,5 +1,5 @@
 import React, { ReactElement, useContext, useEffect, useReducer, useCallback } from "react";
-import { apiPost } from "../api/apiClient";
+import { APIMethod, apiCall } from "../api/apiClient";
 import { useUserAuthContext } from "./UserAuthContext";
 import { MedicationOptions, NewReviewDTO, ReviewData, SelectOption } from "../utils/contants";
 
@@ -7,22 +7,22 @@ interface ReviewContextState {
     userReviews: ReviewData[],
     feedReviews: ReviewData[],
     isLoadingFeedReviews: boolean,
+    isLoadingUserReviews: boolean,
     addReview: (data: NewReviewDTO) => void,
     deleteReview: (reviewId: string, deletingUserId: string) => void,
-    loadUserReviews: () => any,
+    loadUserReviews: (isFirstLoad: boolean) => any,
     loadFeedReviews: (feedReviews: any[]) => void,
-    findReview: (id: string) => any
 }
 
 const initialReviewsState: ReviewContextState = {
     userReviews: [],
     feedReviews: [],
     isLoadingFeedReviews: false,
+    isLoadingUserReviews: false,
     addReview: () => { },
     deleteReview: () => { },
     loadUserReviews: () => { },
     loadFeedReviews: () => { },
-    findReview: () => { }
 }
 
 export const ReviewsContext = React.createContext(initialReviewsState);
@@ -32,9 +32,11 @@ const reducer = (state: ReviewContextState, action: any): ReviewContextState => 
         case "addReview":
             return { ...state, userReviews: [...state.userReviews, action.payload.review] }
         case "setUserReviews":
-            return { ...state, userReviews: action.payload.reviews }
+            return { ...state, userReviews: action.payload.reviews, isLoadingUserReviews: false }
         case "setFeedReviews":
             return { ...state, feedReviews: action.payload.reviews, isLoadingFeedReviews: false }
+        case "setIsLoadingUserReviews":
+            return { ...state, isLoadingUserReviews: action.payload.isLoadingUserReviews }
         case "setFeedReviewsLoading":
             return { ...state, isLoadingFeedReviews: true }
         case "setFeedReviewsLoaded":
@@ -59,8 +61,8 @@ export const ReviewsContextProvider = (props: { children: ReactElement }) => {
             reviewBody: data.reviewBody
         }
         try {
-            await apiPost("/reviews/create", { review: reviewData, userId: user.id }, token);
-            loadUserReviews();
+            await apiCall(APIMethod.POST, "/reviews/create", { review: reviewData, userId: user.id }, token);
+            loadUserReviews(false);
         } catch (error) {
             //TODO: implement error notifying
         }
@@ -68,7 +70,7 @@ export const ReviewsContextProvider = (props: { children: ReactElement }) => {
 
     const deleteReview = async (reviewId: string, deletingUserId: string) => {
         try {
-            await apiPost('/reviews/delete', { reviewId, userId: deletingUserId }, token);
+            await apiCall(APIMethod.POST, '/reviews/delete', { reviewId, userId: deletingUserId }, token);
             const updatedReviews = state.userReviews.filter(review => review._id !== reviewId);
             dispatch({ type: "setUserReviews", payload: { reviews: updatedReviews } });
         } catch (error) {
@@ -76,15 +78,19 @@ export const ReviewsContextProvider = (props: { children: ReactElement }) => {
         }
     }
 
-    const loadUserReviews = useCallback(async () => {
+    const loadUserReviews = useCallback(async (firstLoad: boolean) => {
 
         try {
             if (Object.keys(user).length) {
-                const response = await apiPost("/reviews/get", { userId: user.id }, token);
+                if (firstLoad) {
+                    dispatch({ type: "setIsLoadingUserReviews", payload: { isLoadingUserReviews: true } });
+                }
+                const response = await apiCall(APIMethod.POST, "/reviews/listByUserId", { userId: user.id }, token);
                 const reviews = response.data.data.reviews;
                 dispatch({ type: "setUserReviews", payload: { reviews: reviews } });
             }
         } catch (error) {
+            dispatch({ type: "setIsLoadingUserReviews", payload: { isLoadingUserReviews: false } });
             //TODO: implement error notifying
         }
 
@@ -97,7 +103,7 @@ export const ReviewsContextProvider = (props: { children: ReactElement }) => {
                 date = feedReviews[feedReviews.length - 1].createdAt;
             }
             dispatch({ type: "setFeedReviewsLoading", payload: { isLoading: true } });
-            const response = await apiPost("/reviews/feed", { date });
+            const response = await apiCall(APIMethod.POST, "/reviews/feed", { date });
             const reviews = response.data.data.reviews;
             if (!reviews.length) {
                 dispatch({ type: "setFeedReviewsLoaded", payload: { isLoading: false } });
@@ -110,28 +116,33 @@ export const ReviewsContextProvider = (props: { children: ReactElement }) => {
         }
     }, [])
 
-    const findReview = (id: string) => {
-        let review = state.userReviews.find((review: ReviewData) => { return review._id === `${id}` });
-        if (!review) {
-            review = state.feedReviews.find((review: ReviewData) => { return review._id === `${id}` });
-        }
-        return review;
-    }
-
     useEffect(() => {
         loadFeedReviews([]);
     }, [user, state.userReviews, loadFeedReviews])
 
     useEffect(() => {
-        loadUserReviews();
+        loadUserReviews(true);
     }, [user, loadUserReviews])
 
     return (
-        <ReviewsContext.Provider value={{ ...state, addReview, loadUserReviews, loadFeedReviews, findReview, deleteReview }}>
+        <ReviewsContext.Provider value={{ ...state, addReview, loadUserReviews, loadFeedReviews, deleteReview }}>
             {props.children}
         </ReviewsContext.Provider>
     )
 }
+
+export const loadReviewById = async (reviewId: string): Promise<ReviewData> => {
+    try {
+        const response = await apiCall(APIMethod.GET, `/reviews/get?reviewId=${reviewId}`);
+        const review = response.data.data.review;
+        console.log(review);
+        return review;
+    } catch (error) {
+        //TODO: implement error notifying
+    }
+    return null as unknown as ReviewData;
+}
+
 
 export const useReviewsContext = () => {
     const context = useContext(ReviewsContext)

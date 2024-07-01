@@ -2,11 +2,12 @@ import { useReviewsContext } from "../../context/ReviewsContext"
 import { useUserAuthContext } from "../../context/UserAuthContext"
 import { DocIcon } from "../../svgs/svgs"
 import { ReviewData } from "../../utils/contants"
+import LoadingSpinner from "../Common/LoadingSpinner"
 import ReviewPreview from "../Reviews/ReviewPreview"
 
 const UserReviewsContent = (props: { reviews: ReviewData[] }) => {
 
-    const { deleteReview } = useReviewsContext();
+    const { deleteReview, isLoadingUserReviews } = useReviewsContext();
     const { user } = useUserAuthContext();
 
     return <>
@@ -30,11 +31,17 @@ const UserReviewsContent = (props: { reviews: ReviewData[] }) => {
                     })}
                 </div>
             </> :
-            <>
+            <> {isLoadingUserReviews ?
+                <div className="w-full h-full flex justify-center items-center">
+                    <div className="w-24 h-24">
+                        <LoadingSpinner />
+                    </div>
+                </div> :
                 <div className="w-full border-t border-gray-300 h-full flex flex-col justify-center items-center">
                     <DocIcon />
                     <p className="w-fit text-4xl font-semibold">No Reviews</p>
                 </div>
+            }
             </>
         }
     </>

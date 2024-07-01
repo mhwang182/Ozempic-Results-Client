@@ -4,17 +4,17 @@ import { usePostsContext } from "../../context/PostsContext"
 import { Post, parseBlurHash } from "../../utils/contants"
 import { CameraIcon } from "../../svgs/svgs"
 import { useUserAuthContext } from "../../context/UserAuthContext"
+import LoadingSpinner from "../Common/LoadingSpinner"
 
 const PostGridContent = () => {
 
     const location = useLocation();
-    const { userPosts, deletePost } = usePostsContext();
+    const { userPosts, isUserPostsLoading, deletePost } = usePostsContext();
     const { user } = useUserAuthContext();
     const navigate = useNavigate();
 
     const PostPreview = ({ post }: { post: Post }) => {
         return (
-
             <div className="aspect-square border rounded-md size-full overflow-hidden">
                 <div className="relative size-full flex justify-end group">
                     <button
@@ -37,7 +37,7 @@ const PostGridContent = () => {
                         src={post.beforeImageUrl}
                         alt=""
                         onClick={() => {
-                            navigate(`/post/${post._id}`, { state: { previousLocation: location } })
+                            navigate(`/post/${post._id}`, { state: { previousLocation: location, post } })
                         }}
                     />
                 </div>
@@ -54,11 +54,18 @@ const PostGridContent = () => {
                         <PostPreview post={post} />
                     )
                 })}
-            </div> :
-            <div className="w-full border-t border-gray-300 h-full flex flex-col justify-center items-center">
-                <CameraIcon />
-                <p className="w-fit text-4xl font-semibold">No Posts</p>
-            </div>
+            </div> : <> {isUserPostsLoading ?
+                <div className="w-full h-full flex justify-center items-center">
+                    <div className="h-24 w-24">
+                        <LoadingSpinner />
+                    </div>
+                </div> :
+                <div className="w-full border-t border-gray-300 h-full flex flex-col justify-center items-center">
+                    <CameraIcon />
+                    <p className="w-fit text-4xl font-semibold">No Posts</p>
+                </div>
+            }
+            </>
         }
     </>
 }

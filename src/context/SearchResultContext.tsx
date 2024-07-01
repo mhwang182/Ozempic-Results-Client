@@ -1,5 +1,5 @@
 import React, { ReactElement, useContext, useReducer } from "react";
-import { apiPost } from "../api/apiClient";
+import { APIMethod, apiCall } from "../api/apiClient";
 import { Post } from "../utils/contants";
 
 interface ISearchResultContextState {
@@ -42,7 +42,7 @@ export const SearchResultContextProvider = (props: { children: ReactElement }) =
         dispatch({ type: "setSearchTerm", payload: { searchTerm: searchTerm } });
         try {
             dispatch({ type: "setSearchPostsLoading", payload: { loading: true } });
-            const response = await apiPost("/posts/search", { searchTerm, paginationToken });
+            const response = await apiCall(APIMethod.POST, "/posts/search", { searchTerm, paginationToken });
             if (!response.data?.data || !response.data?.data?.posts) {
                 dispatch({ type: "setSearchPosts", payload: { posts: [] } });
                 return;

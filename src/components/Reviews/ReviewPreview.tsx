@@ -7,7 +7,7 @@ const ReviewPreview = (props: { data: ReviewData, showUserName?: boolean, hovera
     const location = useLocation();
 
     return (
-        <Link to={`/review/${data._id}`} state={{ previousLocation: location }}>
+        <Link to={`/review/${data._id}`} state={{ previousLocation: location, review: data }}>
             <div className={`w-full h-fit border rounded-md shadow-sm p-4 ${hoverable ? 'hover:brightness-95' : ''} bg-white`}>
                 <h1 className="font-semibold">{MedicationToTradeName[data.medication]} {`(${data.medication})`} Review</h1>
                 {showUserName ? <p className="text-sm text-slate-500">By: {data.userDetails?.username}</p> : null}

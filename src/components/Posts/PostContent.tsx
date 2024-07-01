@@ -51,16 +51,18 @@ const PostContent = (props: { post: Post, onClose?: () => void, clickable?: bool
         )
     }
 
+    const navigatePost = () => {
+        if (clickable) {
+            navigate(`/post/${post._id}`, { state: { previousLocation: location, post } })
+        }
+    }
+
     const isOpen = !!onClose;
 
     return (
         <div className="bg-white py-3 flex flex-col space-y-3 items-center rounded-md">
             <div className={`w-full px-3 flex flex-row justify-between ${clickable ? 'hover:cursor-pointer' : ''}`}
-                onClick={() => {
-                    if (clickable) {
-                        navigate(`/post/${post._id}`, { state: { previousLocation: location } })
-                    }
-                }}
+                onClick={navigatePost}
             >
                 <span>
                     {post.userDetails && <p className="font-semibold text-sm">Posted By: {post.userDetails.username}</p>}
@@ -103,12 +105,10 @@ const PostContent = (props: { post: Post, onClose?: () => void, clickable?: bool
                 </TransitionGroup>
 
             </div>
-            <div className={`w-full h-fit flex px-2 flex-wrap ${clickable ? 'hover:cursor-pointer' : ''}`}
-                onClick={() => {
-                    if (clickable) {
-                        navigate(`/post/${post._id}`, { state: { previousLocation: location } })
-                    }
-                }}>
+            <div
+                className={`w-full h-fit flex px-2 flex-wrap ${clickable ? 'hover:cursor-pointer' : ''}`}
+                onClick={navigatePost}
+            >
                 <div className="w-fit py-2 px-4 bg-gradient-to-r from-sky-500 to-teal-500 rounded-full text-sm text-white mr-2 mb-2 font-semibold">
                     {`${MedicationToTradeName[post.medicationUsed]} (${post.medicationUsed})`}
                 </div>
@@ -116,12 +116,10 @@ const PostContent = (props: { post: Post, onClose?: () => void, clickable?: bool
                     {`${post.weightLost} (lbs lost)`}
                 </div>
             </div>
-            <div className={`w-full px-3 text-sm flex ${clickable ? 'hover:cursor-pointer' : ''}`}
-                onClick={() => {
-                    if (clickable) {
-                        navigate(`/post/${post._id}`, { state: { previousLocation: location } })
-                    }
-                }}>
+            <div
+                className={`w-full px-3 text-sm flex ${clickable ? 'hover:cursor-pointer' : ''}`}
+                onClick={navigatePost}
+            >
                 {isOpen ?
                     <p>
                         {post.userDetails &&
@@ -129,7 +127,7 @@ const PostContent = (props: { post: Post, onClose?: () => void, clickable?: bool
                         }&nbsp;
                         {post.caption}
                     </p> :
-                    <Link to={`/post/${post._id}`} state={{ previousLocation: location }}>
+                    <Link to={`/post/${post._id}`} state={{ previousLocation: location, post }}>
                         <div className={`text-ellipsis overflow-hidden whitespace-nowrap w-full sm:max-w-[390px] max-w-56`}>
                             {post.userDetails &&
                                 <p className="font-semibold w-fit float-left">{`${post.userDetails.username}: `} </p>

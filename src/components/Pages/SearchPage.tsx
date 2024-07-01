@@ -34,12 +34,12 @@ const SearchPage = () => {
                                 searchPosts.map((post, index) => {
                                     if (index === searchPosts.length - 1) {
                                         return <div className="border border-gray-300 rounded-md overflow-hidden shadow-md w-full mb-4" >
-                                            <PostContent post={post} />
+                                            <PostContent post={post} clickable />
                                             <div ref={ref} className="invisible" />
                                         </div>
                                     }
                                     return <div className="border border-gray-300 rounded-md overflow-hidden shadow-md w-full mb-4" >
-                                        <PostContent post={post} />
+                                        <PostContent post={post} clickable />
                                     </div>
                                 })
                             }
