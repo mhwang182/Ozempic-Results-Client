@@ -70,7 +70,7 @@ const SideBar = () => {
                                 type="submit"
                                 className="absolute right-0 top-0 mt-4 mr-4"
                                 onClick={() => {
-                                    getSearchPosts(searchTerm);
+                                    getSearchPosts(searchTerm, true);
                                     setIsSearchOpen(false);
                                 }}
                             >
@@ -88,7 +88,7 @@ const SideBar = () => {
                                     <div
                                         className="py-2 px-4 bg-gradient-to-r from-sky-500 to-teal-500 rounded-full text-sm text-white mr-2 mb-2 font-semibold w-60 cursor-pointer hover:brightness-95"
                                         onClick={() => {
-                                            getSearchPosts(med.OfficialName);
+                                            getSearchPosts(med.OfficialName, true);
                                             setIsSearchOpen(false);
                                         }}
                                     >

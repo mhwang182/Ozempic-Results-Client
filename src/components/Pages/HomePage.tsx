@@ -22,7 +22,6 @@ const HomePage = () => {
     } = usePostsContext();
 
     const { token } = useUserAuthContext();
-
     const { feedReviews, isLoadingFeedReviews } = useReviewsContext();
 
     const lastPostRef = useRef<HTMLElement>(null);
@@ -58,9 +57,9 @@ const HomePage = () => {
     return (
         <>{isHomePageLoading ?
             <HomePageSkeleton /> :
-            <div className="bg-zinc-50 h-screen">
-                <div className="flex flex-row justify-center pt-5 h-screen overflow-y-scroll">
-                    <div className="h-screen max-w-md  w-full mx-5">
+            <div className="bg-zinc-50 min-h-screen">
+                <div className="flex flex-row justify-center pt-5">
+                    <div className="max-w-md  w-full mx-5">
                         <div className="flex flex-col ml-0 space-y-5 w-full">
                             {feedPosts && feedPosts.map((post, index) => {
                                 if (index === feedPosts.length - 1) {
@@ -93,7 +92,6 @@ const HomePage = () => {
                                         </Link>
                                     }
                                 </div>
-
                             </div>
                         }
                     </div>

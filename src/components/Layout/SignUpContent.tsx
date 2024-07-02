@@ -43,7 +43,7 @@ const SingUpContent = () => {
     const genericMessage = "*This field is required";
 
     return (
-        <div className="min-h-screen max-h-full pt-10  flex flex-col px-8">
+        <div className="min-h-screen max-h-full pt-10 flex flex-col">
             <h2
                 className="text-center text-2xl font-bold leading-9 tracking-tight text-gray-900"
             >
@@ -150,7 +150,7 @@ const SingUpContent = () => {
                                     errorMessage={genericMessage}
                                 />}
                         />
-                        <Tooltip text={"Email test@test.com for a sign up code!"} />
+                        <Tooltip text={"Email mhwang.dev@gmail.com for a sign up code!"} />
                     </div>
                 </div>
                 <div className="sm:max-w-sm sm:w-full sm:mx-auto mt-10">

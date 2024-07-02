@@ -80,6 +80,7 @@ export interface Post {
     beforeImageId: string,
     afterImageId: string,
     createdAt: string,
+    userId: string,
     userDetails?: {
         username: string
     },

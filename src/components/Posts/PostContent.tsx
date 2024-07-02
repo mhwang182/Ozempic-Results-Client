@@ -6,11 +6,14 @@ import { Post } from "../../utils/contants";
 import { Blurhash } from "react-blurhash";
 import { MedicationToTradeName, getDateString, parseBlurHash } from "../../utils/contants";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useSearchResultContext } from "../../context/SearchResultContext";
 
 const PostContent = (props: { post: Post, onClose?: () => void, clickable?: boolean }) => {
 
     const [direction, setDirection] = useState('slide-right');
     const [imgPage, setImgPage] = useState(0);
+
+    const { getUserSearchPosts } = useSearchResultContext();
 
     const location = useLocation();
 
@@ -57,6 +60,15 @@ const PostContent = (props: { post: Post, onClose?: () => void, clickable?: bool
         }
     }
 
+    const performUserSearch = (e: React.MouseEvent<any>) => {
+        e.stopPropagation();
+        if (!post.userDetails) {
+            return;
+        }
+        getUserSearchPosts(post.userDetails?.username, post.userId, true);
+        navigate("/search");
+    }
+
     const isOpen = !!onClose;
 
     return (
@@ -65,7 +77,11 @@ const PostContent = (props: { post: Post, onClose?: () => void, clickable?: bool
                 onClick={navigatePost}
             >
                 <span>
-                    {post.userDetails && <p className="font-semibold text-sm">Posted By: {post.userDetails.username}</p>}
+                    {post.userDetails &&
+                        <p
+                            className="font-semibold text-sm"
+                        >Posted By: {post.userDetails.username}</p>
+                    }
                     <p className="text-slate-500 text-sm">{getDateString(post.createdAt)}</p>
                 </span>
 

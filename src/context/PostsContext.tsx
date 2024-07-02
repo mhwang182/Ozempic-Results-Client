@@ -2,19 +2,7 @@ import React, { ReactElement, useCallback, useContext, useEffect, useReducer } f
 import { apiCall, APIMethod } from "../api/apiClient";
 import { useUserAuthContext } from "./UserAuthContext";
 import { Post, PostDetailsDTO } from "../utils/contants";
-
-interface PostsState {
-    userPosts: Post[],
-    feedPosts: Post[],
-    isUploadLoading: boolean,
-    isFeedLoading: boolean,
-    isUserPostsLoading: boolean,
-    atFeedEnd: boolean,
-    loadPostById: (postId: string) => Promise<Post>
-    uploadPost: (beforeImage: File, afterImage: File, postDetails: PostDetailsDTO) => void,
-    deletePost: (deleteingUserId: string, postId: string) => void,
-    loadFeedPosts: (feedPosts: Post[]) => void
-}
+import { PostsState } from "../utils/ContextTypes";
 
 const initialPostsState: PostsState = {
     userPosts: [],
@@ -41,6 +29,7 @@ const reducer = (state: PostsState, action: any): PostsState => {
             return { ...state, isFeedLoading: true }
         case "setUserPostsLoading":
             return { ...state, isUserPostsLoading: action.payload.isUserPostsLoading }
+        //TODO: move to useState perhaps
         case "setFeedLoaded":
             if (action.paylod && action.payload.atFeedEnd) {
                 return { ...state, isFeedLoading: false, atFeedEnd: true }

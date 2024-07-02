@@ -6,7 +6,13 @@ import LoadingSpinner from "../Common/LoadingSpinner";
 
 const SearchPage = () => {
 
-    const { searchTerm, searchPosts, getSearchPosts, isLoadingSearchPosts } = useSearchResultContext();
+    const {
+        searchTerm,
+        searchPosts,
+        getSearchPosts,
+        isLoadingSearchPosts,
+        isCurrentlyUserSearch
+    } = useSearchResultContext();
 
     const lastPostRef = useRef<HTMLElement>(null);
 
@@ -17,7 +23,10 @@ const SearchPage = () => {
 
     useEffect(() => {
         if (entry?.isIntersecting && searchPosts.length) {
-            getSearchPosts(searchTerm, searchPosts[searchPosts.length - 1].paginationToken);
+            if (isCurrentlyUserSearch) {
+                return;
+            }
+            getSearchPosts(searchTerm, false, searchPosts[searchPosts.length - 1].paginationToken);
         }
     }, [entry])
 

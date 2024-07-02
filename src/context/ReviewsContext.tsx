@@ -2,17 +2,8 @@ import React, { ReactElement, useContext, useEffect, useReducer, useCallback } f
 import { APIMethod, apiCall } from "../api/apiClient";
 import { useUserAuthContext } from "./UserAuthContext";
 import { MedicationOptions, NewReviewDTO, ReviewData, SelectOption } from "../utils/contants";
-
-interface ReviewContextState {
-    userReviews: ReviewData[],
-    feedReviews: ReviewData[],
-    isLoadingFeedReviews: boolean,
-    isLoadingUserReviews: boolean,
-    addReview: (data: NewReviewDTO) => void,
-    deleteReview: (reviewId: string, deletingUserId: string) => void,
-    loadUserReviews: (isFirstLoad: boolean) => any,
-    loadFeedReviews: (feedReviews: any[]) => void,
-}
+import { ReviewContextState } from "../utils/ContextTypes";
+import reducer from "./Reducers/ReviewsContextReducer";
 
 const initialReviewsState: ReviewContextState = {
     userReviews: [],
@@ -26,25 +17,6 @@ const initialReviewsState: ReviewContextState = {
 }
 
 export const ReviewsContext = React.createContext(initialReviewsState);
-
-const reducer = (state: ReviewContextState, action: any): ReviewContextState => {
-    switch (action.type) {
-        case "addReview":
-            return { ...state, userReviews: [...state.userReviews, action.payload.review] }
-        case "setUserReviews":
-            return { ...state, userReviews: action.payload.reviews, isLoadingUserReviews: false }
-        case "setFeedReviews":
-            return { ...state, feedReviews: action.payload.reviews, isLoadingFeedReviews: false }
-        case "setIsLoadingUserReviews":
-            return { ...state, isLoadingUserReviews: action.payload.isLoadingUserReviews }
-        case "setFeedReviewsLoading":
-            return { ...state, isLoadingFeedReviews: true }
-        case "setFeedReviewsLoaded":
-            return { ...state, isLoadingFeedReviews: false }
-        default:
-            return { ...state }
-    }
-}
 
 export const ReviewsContextProvider = (props: { children: ReactElement }) => {
 
@@ -72,7 +44,7 @@ export const ReviewsContextProvider = (props: { children: ReactElement }) => {
         try {
             await apiCall(APIMethod.POST, '/reviews/delete', { reviewId, userId: deletingUserId }, token);
             const updatedReviews = state.userReviews.filter(review => review._id !== reviewId);
-            dispatch({ type: "setUserReviews", payload: { reviews: updatedReviews } });
+            dispatch({ type: "SET_USER_REVIEWS", payload: { reviews: updatedReviews } });
         } catch (error) {
             //TODO: implement error notifying
         }
@@ -83,14 +55,14 @@ export const ReviewsContextProvider = (props: { children: ReactElement }) => {
         try {
             if (Object.keys(user).length) {
                 if (firstLoad) {
-                    dispatch({ type: "setIsLoadingUserReviews", payload: { isLoadingUserReviews: true } });
+                    dispatch({ type: "SET_IS_LOADING_USER_REVIEWS", payload: { isLoadingUserReviews: true } });
                 }
                 const response = await apiCall(APIMethod.POST, "/reviews/listByUserId", { userId: user.id }, token);
                 const reviews = response.data.data.reviews;
-                dispatch({ type: "setUserReviews", payload: { reviews: reviews } });
+                dispatch({ type: "SET_USER_REVIEWS", payload: { reviews: reviews } });
             }
         } catch (error) {
-            dispatch({ type: "setIsLoadingUserReviews", payload: { isLoadingUserReviews: false } });
+            dispatch({ type: "SET_IS_LOADING_USER_REVIEWS", payload: { isLoadingUserReviews: false } });
             //TODO: implement error notifying
         }
 
@@ -102,16 +74,16 @@ export const ReviewsContextProvider = (props: { children: ReactElement }) => {
             if (feedReviews.length) {
                 date = feedReviews[feedReviews.length - 1].createdAt;
             }
-            dispatch({ type: "setFeedReviewsLoading", payload: { isLoading: true } });
+            dispatch({ type: "SET_IS_LOADING_FEED_REVIEWS", payload: { isLoadingFeedReviews: true } });
             const response = await apiCall(APIMethod.POST, "/reviews/feed", { date });
             const reviews = response.data.data.reviews;
             if (!reviews.length) {
-                dispatch({ type: "setFeedReviewsLoaded", payload: { isLoading: false } });
+                dispatch({ type: "SET_IS_LOADING_FEED_REVIEWS", payload: { isLoadingFeedReviews: false } });
             } else {
-                dispatch({ type: "setFeedReviews", payload: { reviews: [...feedReviews, ...reviews] } });
+                dispatch({ type: "SET_FEED_REVIEWS", payload: { reviews: [...feedReviews, ...reviews] } });
             }
         } catch (error) {
-            dispatch({ type: "setFeedReviewsLoaded" });
+            dispatch({ type: "SET_IS_LOADING_FEED_REVIEWS", payload: { isLoadingFeedReviews: false } });
             //TODO: implement error notifying
         }
     }, [])
@@ -135,7 +107,6 @@ export const loadReviewById = async (reviewId: string): Promise<ReviewData> => {
     try {
         const response = await apiCall(APIMethod.GET, `/reviews/get?reviewId=${reviewId}`);
         const review = response.data.data.review;
-        console.log(review);
         return review;
     } catch (error) {
         //TODO: implement error notifying
