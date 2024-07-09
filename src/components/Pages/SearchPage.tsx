@@ -10,6 +10,7 @@ const SearchPage = () => {
         searchTerm,
         searchPosts,
         getSearchPosts,
+        getUserSearchPosts,
         isLoadingSearchPosts,
         isCurrentlyUserSearch
     } = useSearchResultContext();
@@ -24,6 +25,7 @@ const SearchPage = () => {
     useEffect(() => {
         if (entry?.isIntersecting && searchPosts.length) {
             if (isCurrentlyUserSearch) {
+                getUserSearchPosts(false, searchPosts);
                 return;
             }
             getSearchPosts(searchTerm, false, searchPosts[searchPosts.length - 1].paginationToken);
@@ -42,12 +44,12 @@ const SearchPage = () => {
                             {
                                 searchPosts.map((post, index) => {
                                     if (index === searchPosts.length - 1) {
-                                        return <div className="border border-gray-300 rounded-md overflow-hidden shadow-md w-full mb-4" >
+                                        return <div className="border border-gray-300 rounded-md overflow-hidden shadow-md w-full mb-4" key={post._id}>
                                             <PostContent post={post} clickable />
                                             <div ref={ref} className="invisible" />
                                         </div>
                                     }
-                                    return <div className="border border-gray-300 rounded-md overflow-hidden shadow-md w-full mb-4" >
+                                    return <div className="border border-gray-300 rounded-md overflow-hidden shadow-md w-full mb-4" key={post._id} >
                                         <PostContent post={post} clickable />
                                     </div>
                                 })

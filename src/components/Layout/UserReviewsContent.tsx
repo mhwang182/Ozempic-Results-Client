@@ -7,8 +7,9 @@ import ReviewPreview from "../Reviews/ReviewPreview"
 
 const UserReviewsContent = (props: { reviews: ReviewData[] }) => {
 
-    const { deleteReview, isLoadingUserReviews } = useReviewsContext();
-    const { user } = useUserAuthContext();
+    const { deleteReview, loadFeedReviews, isLoadingUserReviews } = useReviewsContext();
+
+    const { token } = useUserAuthContext();
 
     return <>
         {props.reviews && props.reviews.length > 0 ?
@@ -18,10 +19,11 @@ const UserReviewsContent = (props: { reviews: ReviewData[] }) => {
                         return <div className="relative group">
                             <button
                                 className="group-hover:opacity-100 hover:brightness-95 opacity-0 absolute z-30 bg-sky-600 p-2 rounded-md text-white mt-2 mr-2 font-semibold right-0"
-                                onClick={() => {
-                                    if (review._id && user.id) {
-                                        deleteReview(review._id, user.id);
-                                    }
+                                onClick={async () => {
+                                    if (!review._id || !token || token.length === 0) return;
+
+                                    await deleteReview(review._id);
+                                    loadFeedReviews([]);
                                 }}
                             >
                                 Delete
@@ -38,7 +40,7 @@ const UserReviewsContent = (props: { reviews: ReviewData[] }) => {
                     </div>
                 </div> :
                 <div className="w-full border-t border-gray-300 h-full flex flex-col justify-center items-center">
-                    <DocIcon />
+                    <DocIcon size="large" />
                     <p className="w-fit text-4xl font-semibold">No Reviews</p>
                 </div>
             }

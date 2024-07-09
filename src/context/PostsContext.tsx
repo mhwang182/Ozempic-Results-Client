@@ -1,4 +1,4 @@
-import React, { ReactElement, useCallback, useContext, useEffect, useReducer } from "react";
+import React, { ReactElement, useCallback, useContext, useEffect, useReducer, useState } from "react";
 import { apiCall, APIMethod } from "../api/apiClient";
 import { useUserAuthContext } from "./UserAuthContext";
 import { Post, PostDetailsDTO } from "../utils/contants";
@@ -31,7 +31,7 @@ const reducer = (state: PostsState, action: any): PostsState => {
             return { ...state, isUserPostsLoading: action.payload.isUserPostsLoading }
         //TODO: move to useState perhaps
         case "setFeedLoaded":
-            if (action.paylod && action.payload.atFeedEnd) {
+            if (action.payload && action.payload.atFeedEnd) {
                 return { ...state, isFeedLoading: false, atFeedEnd: true }
             }
             return { ...state, isFeedLoading: false }
@@ -44,8 +44,10 @@ export const PostsContext = React.createContext(initialPostsState);
 
 export const PostsContextProvider = ({ children }: { children: ReactElement }) => {
 
-    const { token, user } = useUserAuthContext();
+    const { token } = useUserAuthContext();
     const [state, dispatch] = useReducer<(state: PostsState, action: any) => PostsState>(reducer, initialPostsState);
+
+    const [feedPostCount, setFeedPostCount] = useState(0);
 
     const uploadPost = async (beforeImage: File, afterImage: File, postDetails: PostDetailsDTO) => {
         if (!beforeImage || !afterImage) {
@@ -57,7 +59,6 @@ export const PostsContextProvider = ({ children }: { children: ReactElement }) =
         formData.append('weightLost', `${postDetails.weightLost}`);
         formData.append('medicationUsed', postDetails.medicationUsed);
         formData.append('caption', postDetails.caption);
-        if (user.id) { formData.append('userId', user.id) };
 
         try {
             await apiCall(APIMethod.POST, '/posts/create', formData, token, 'multipart/form-data');
@@ -67,10 +68,9 @@ export const PostsContextProvider = ({ children }: { children: ReactElement }) =
         }
     }
 
-    const deletePost = async (deletingUserId: string, postId: string) => {
-        console.log(postId, deletingUserId);
+    const deletePost = async (postId: string) => {
         try {
-            await apiCall(APIMethod.POST, '/posts/delete', { userId: deletingUserId, postId }, token);
+            await apiCall(APIMethod.POST, '/posts/delete', { postId }, token);
             dispatch({ type: "setUserPosts", payload: { posts: state.userPosts.filter((post) => post._id !== postId) } });
         } catch (error) {
             //TODO: implement error notifying
@@ -79,53 +79,50 @@ export const PostsContextProvider = ({ children }: { children: ReactElement }) =
 
     const loadUserPosts = useCallback(async (firstLoad: boolean) => {
         try {
-            if (Object.keys(user).length) {
-                const data = { userId: user.id };
-                if (firstLoad) {
-                    dispatch({ type: "setUserPostsLoading", payload: { isUserPostsLoading: true } })
-                }
-                const response = await apiCall(APIMethod.POST, '/posts/getPostsByUser', data, token);
-                const posts = response.data.data.posts;
-                dispatch({ type: "setUserPosts", payload: { posts } });
+            if (!token || token.length === 0) return;
+
+            if (firstLoad) {
+                dispatch({ type: "setUserPostsLoading", payload: { isUserPostsLoading: true } })
             }
+
+            const response = await apiCall(APIMethod.POST, '/posts/getPostsByUser', undefined, token);
+            const posts = response.data.data.posts;
+            dispatch({ type: "setUserPosts", payload: { posts } });
         } catch (error) {
             //TODO: implement error notifying
             dispatch({ type: "setUserPostsLoading", payload: { isUserPostsLoading: false } })
         }
-    }, [user, token])
+    }, [token])
 
-    const loadFeedPosts = useCallback(async (feedPosts: Post[]) => {
+    const loadFeedPosts = useCallback(async (feedPosts: Post[], atFeedEnd: boolean) => {
         try {
-
-            let date = (new Date()).toISOString();
-
-            if (feedPosts.length > 0) {
-                date = feedPosts[feedPosts.length - 1].createdAt;
-            }
-
-            let data = { userId: user.id, date };
+            let date = feedPosts.length > 0 ? feedPosts[feedPosts.length - 1].createdAt : (new Date()).toISOString();
 
             dispatch({ type: "setFeedLoading" });
-            const response = await apiCall(APIMethod.POST, '/posts/feed', data, token)
+            const response = await apiCall(APIMethod.POST, '/posts/feed', { date }, token)
             const posts = response.data.data.posts;
 
-            if (posts.length === 0) {
+            if (posts.length === 0 && feedPosts.length) {
+                if (atFeedEnd) return;
                 dispatch({ type: "setFeedLoaded", payload: { atFeedEnd: true } });
                 return;
             }
-            dispatch({ type: "setFeedPosts", payload: { posts: [...feedPosts, ...posts] } });
+            const updatedFeed = [...feedPosts, ...posts];
+            if (updatedFeed.length !== feedPostCount) {
+                setFeedPostCount(updatedFeed.length);
+            }
+
+            dispatch({ type: "setFeedPosts", payload: { posts: updatedFeed } });
 
         } catch (error) {
             dispatch({ type: "setFeedLoaded" });
         }
-    }, [user, token])
+    }, [token, feedPostCount])
 
     const loadPostById = async (postId: string): Promise<Post> => {
         try {
-            console.log("trying load post by id");
             const response = await apiCall(APIMethod.GET, `posts/get?postId=${postId}`);
             const post = response.data.data.post;
-            console.log(post)
             return post;
         } catch (error) {
             //TODO: implement error notifying
@@ -133,15 +130,20 @@ export const PostsContextProvider = ({ children }: { children: ReactElement }) =
         return null as unknown as Post
     }
 
+    //load posts on first app load
     useEffect(() => {
-        loadFeedPosts([]);
+        if (feedPostCount > 0) return;
+        loadFeedPosts([], false);
+
+    }, [loadFeedPosts, token, feedPostCount])
+
+    useEffect(() => {
         if (!token || token.length === 0) {
-            dispatch({ type: "removePosts" })
+            dispatch({ type: "removePosts" });
             return;
         }
         loadUserPosts(true);
-
-    }, [loadUserPosts, loadFeedPosts, token])
+    }, [token, loadUserPosts])
 
     return (
         <PostsContext.Provider value={{ ...state, uploadPost, deletePost, loadFeedPosts, loadPostById }}>

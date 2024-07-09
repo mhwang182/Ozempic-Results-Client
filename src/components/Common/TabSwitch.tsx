@@ -14,7 +14,7 @@ const TabSwitch = (props: ITabSwitchProps) => {
 
     const whiteBg = "bg-white text-gray-800 border";
 
-    return <div className="w-full flex">
+    return <div className="w-full flex cursor-pointer">
         <div
             className={`w-full flex justify-center font-semibold rounded-l px-5 py-1 ${page === 0 ? gradientBg : whiteBg} border-gray-200 hover:brightness-95`}
             onClick={() => { setPage(0) }}

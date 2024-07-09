@@ -60,11 +60,11 @@ const NewPostForm = ({ onFormSubmit, submitFormRef, isUploading }: INewFormPostP
                     <Controller
                         name='caption'
                         control={control}
-                        rules={{ required: true, maxLength: 150 }}
+                        rules={{ required: true, maxLength: 300 }}
                         render={({ field }) =>
                             <SurveyInput
                                 {...field}
-                                title='Caption (150 character max)'
+                                title='Caption (300 character max)'
                                 isTextArea
                                 error={errors.caption}
                                 errorMessage='*This field is required'

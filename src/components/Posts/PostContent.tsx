@@ -65,7 +65,7 @@ const PostContent = (props: { post: Post, onClose?: () => void, clickable?: bool
         if (!post.userDetails) {
             return;
         }
-        getUserSearchPosts(post.userDetails?.username, post.userId, true);
+        getUserSearchPosts(true, [], post.userDetails?.username, post.userId);
         navigate("/search");
     }
 
@@ -79,7 +79,8 @@ const PostContent = (props: { post: Post, onClose?: () => void, clickable?: bool
                 <span>
                     {post.userDetails &&
                         <p
-                            className="font-semibold text-sm"
+                            className="font-semibold text-sm hover:underline cursor-pointer"
+                            onClick={performUserSearch}
                         >Posted By: {post.userDetails.username}</p>
                     }
                     <p className="text-slate-500 text-sm">{getDateString(post.createdAt)}</p>

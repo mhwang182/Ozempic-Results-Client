@@ -43,14 +43,16 @@ const HomePage = () => {
     }
 
     useEffect(() => {
+        if (atFeedEnd) return;
+
         const load = async () => {
             if (entry?.isIntersecting) {
-                loadFeedPosts(feedPosts);
+                loadFeedPosts(feedPosts, atFeedEnd);
             }
         }
         load();
 
-    }, [entry, loadFeedPosts, feedPosts])
+    }, [entry, loadFeedPosts, feedPosts, atFeedEnd])
 
     const isHomePageLoading = (isFeedLoading && feedPosts.length === 0) || isLoadingFeedReviews;
 

@@ -6,7 +6,7 @@ export interface ISearchResultContextState {
     isLoadingSearchPosts: boolean,
     isCurrentlyUserSearch: boolean,
     getSearchPosts: (searchTerm: string, isNewSearch: boolean, paginationToken?: string) => void,
-    getUserSearchPosts: (username: string, userId: string, isNewSearch: boolean, paginationToken?: string) => void
+    getUserSearchPosts: (isNewSearch: boolean, searchPosts: Post[], username?: string, userId?: string) => void
 }
 
 export interface ReviewContextState {
@@ -14,8 +14,8 @@ export interface ReviewContextState {
     feedReviews: ReviewData[],
     isLoadingFeedReviews: boolean,
     isLoadingUserReviews: boolean,
-    addReview: (data: NewReviewDTO) => void,
-    deleteReview: (reviewId: string, deletingUserId: string) => void,
+    addReview: (data: NewReviewDTO) => Promise<void>,
+    deleteReview: (reviewId: string) => void,
     loadUserReviews: (isFirstLoad: boolean) => any,
     loadFeedReviews: (feedReviews: any[]) => void,
 }
@@ -29,6 +29,6 @@ export interface PostsState {
     atFeedEnd: boolean,
     loadPostById: (postId: string) => Promise<Post>
     uploadPost: (beforeImage: File, afterImage: File, postDetails: PostDetailsDTO) => void,
-    deletePost: (deleteingUserId: string, postId: string) => void,
-    loadFeedPosts: (feedPosts: Post[]) => void
+    deletePost: (postId: string) => void,
+    loadFeedPosts: (feedPosts: Post[], atFeedEnd: boolean) => void
 }

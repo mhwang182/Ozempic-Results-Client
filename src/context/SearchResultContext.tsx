@@ -1,8 +1,8 @@
 import React, { ReactElement, useContext, useReducer, useState } from "react";
 import { APIMethod, apiCall } from "../api/apiClient";
-import { Post } from "../utils/contants";
 import reducer from "./Reducers/SearchResultsContextReducer";
 import { ISearchResultContextState } from "../utils/ContextTypes";
+import { Post } from "../utils/contants";
 
 const initialState: ISearchResultContextState = {
     searchTerm: "",
@@ -20,8 +20,8 @@ export const SearchResultContextProvider = (props: { children: ReactElement }) =
     const [state, dispatch] = useReducer(reducer, initialState);
 
     const [isCurrentlyUserSearch, setIsCurrentlyUserSearch] = useState(false);
-    const [usernameSearch, setUsernameSearch] = useState("");
-    const [userIdSearch, setUserIdSearch] = useState("");
+    const [searchUsername, setSearchUsername] = useState("");
+    const [searchUserId, setSearchUserId] = useState("");
 
     const fetchSearch = async (searchTerm: string, paginationToken?: string) => {
         try {
@@ -43,21 +43,41 @@ export const SearchResultContextProvider = (props: { children: ReactElement }) =
         }
     }
 
-    const getUserSearchPosts = async (username: string, userId: string, isNewSearch: boolean, paginationToken?: string) => {
-        if (!username || !userId) {
+    const getUserSearchPosts = async (isNewSearch: boolean, searchPosts: Post[], username?: string, userId?: string) => {
+
+        if (username && userId) {
+            setSearchUsername(username);
+            setSearchUserId(userId);
+        }
+
+        if (!isNewSearch && (searchUsername.length === 0 || searchUserId.length === 0)) {
             return;
         }
 
-        setUsernameSearch(username);
-        setUserIdSearch(userId);
-
         if (isNewSearch) {
+            dispatch({ type: "SET_SEARCH_TERM", payload: { searchTerm: username } });
             dispatch({ type: "SET_SEARCH_POSTS", payload: { posts: [] } });
             setIsCurrentlyUserSearch(true);
         }
 
-        dispatch({ type: "SET_SEARCH_TERM", payload: { searchTerm: username } });
-        fetchSearch(userId, paginationToken);
+        try {
+            dispatch({ type: "SET_SEARCH_POSTS_LOADING", payload: { loading: true } });
+            let date = (new Date()).toISOString();
+            if (searchPosts.length) {
+                date = searchPosts[searchPosts.length - 1].createdAt;
+            }
+
+            const response = await apiCall(APIMethod.POST, "/posts/searchByUserId", { userId: isNewSearch ? userId : searchUserId, date });
+            const posts = response.data.data.posts;
+
+            if (posts.length === 0) {
+                dispatch({ type: "SET_SEARCH_POSTS_LOADING", payload: { loading: false } });
+                return;
+            }
+            dispatch({ type: "SET_SEARCH_POSTS", payload: { posts: [...searchPosts, ...posts] } });
+        } catch (error) {
+            dispatch({ type: "SET_SEARCH_POSTS_LOADING", payload: { loading: false } });
+        }
     }
 
     const getSearchPosts = async (searchTerm: string, isNewSearch: boolean, paginationToken?: string) => {

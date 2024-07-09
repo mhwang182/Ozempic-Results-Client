@@ -43,7 +43,6 @@ const reducer = (state: any, action: any) => {
         case 'setUser':
             localStorage.setItem(`${appName}-token`, action.payload.token)
             localStorage.setItem(`${appName}-user`, JSON.stringify(action.payload.user))
-            console.log(action.payload.user);
             return {
                 ...state,
                 token: action.payload.token,

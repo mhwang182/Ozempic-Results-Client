@@ -13,7 +13,7 @@ const NewReviewModal = ({ onClose }: { onClose: () => void }) => {
 
     const [rating, setRating] = useState(0);
 
-    const { addReview } = useReviewsContext();
+    const { addReview, loadFeedReviews } = useReviewsContext();
 
     const { control, formState: { errors }, handleSubmit } = useForm({
         defaultValues: {
@@ -28,8 +28,10 @@ const NewReviewModal = ({ onClose }: { onClose: () => void }) => {
         sideEffects: SelectOption,
         reviewBody: string
     }> = (data) => {
-        console.log({ ...data, rating });
-        addReview({ ...data, rating });
+        addReview({ ...data, rating }).then(() => {
+            loadFeedReviews([]);
+        })
+
         onClose();
     }
 

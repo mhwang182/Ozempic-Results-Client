@@ -14,6 +14,8 @@ const NewPostModal = ({ onClose }: { onClose: () => void }) => {
     const [uploadLoading, setUploadLoading] = useState(false);
     const { uploadPost } = usePostsContext();
 
+    const { loadFeedPosts } = usePostsContext();
+
     const submitForm = useRef<HTMLFormElement>(null)
 
     const onFormSubmit: SubmitHandler<{
@@ -32,6 +34,7 @@ const NewPostModal = ({ onClose }: { onClose: () => void }) => {
                     caption: data.caption
                 }
             )
+            loadFeedPosts([], false);
             setUploadLoading(false);
         }
         onClose();

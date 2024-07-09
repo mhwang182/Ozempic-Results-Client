@@ -9,8 +9,8 @@ import LoadingSpinner from "../Common/LoadingSpinner"
 const PostGridContent = () => {
 
     const location = useLocation();
-    const { userPosts, isUserPostsLoading, deletePost } = usePostsContext();
-    const { user } = useUserAuthContext();
+    const { userPosts, isUserPostsLoading, deletePost, loadFeedPosts } = usePostsContext();
+    const { token } = useUserAuthContext();
     const navigate = useNavigate();
 
     const PostPreview = ({ post }: { post: Post }) => {
@@ -19,9 +19,10 @@ const PostGridContent = () => {
                 <div className="relative size-full flex justify-end group">
                     <button
                         className="group-hover:opacity-100 hover:brightness-95 opacity-0 absolute z-30 bg-sky-600 p-2 rounded-md text-white mt-2 mr-2 font-semibold"
-                        onClick={() => {
-                            if (user && user.id) {
-                                deletePost(user.id, post._id);
+                        onClick={async () => {
+                            if (token) {
+                                await deletePost(post._id);
+                                loadFeedPosts([], false);
                             }
                         }}
                     >
