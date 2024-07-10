@@ -22,7 +22,7 @@ const App = () => {
 
   return (
     <div className="App">
-      <div className='flex flex-1'>
+      <div className='flex'>
         <Routes>
           <Route path="/post/:id" element={<PostModal onClose={() => {
             navigate(previousLocation || "/");

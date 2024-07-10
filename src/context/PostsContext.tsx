@@ -14,7 +14,8 @@ const initialPostsState: PostsState = {
     loadPostById: () => { return null as unknown as Promise<Post> },
     uploadPost: () => { },
     deletePost: () => { },
-    loadFeedPosts: () => { }
+    loadFeedPosts: () => { },
+    resetFeedEnd: () => { }
 }
 
 const reducer = (state: PostsState, action: any): PostsState => {
@@ -30,6 +31,8 @@ const reducer = (state: PostsState, action: any): PostsState => {
         case "setUserPostsLoading":
             return { ...state, isUserPostsLoading: action.payload.isUserPostsLoading }
         //TODO: move to useState perhaps
+        case "resetFeedEnd":
+            return { ...state, atFeedEnd: false }
         case "setFeedLoaded":
             if (action.payload && action.payload.atFeedEnd) {
                 return { ...state, isFeedLoading: false, atFeedEnd: true }
@@ -130,6 +133,10 @@ export const PostsContextProvider = ({ children }: { children: ReactElement }) =
         return null as unknown as Post
     }
 
+    const resetFeedEnd = () => {
+        dispatch({ type: "resetFeedEdn" });
+    }
+
     //load posts on first app load
     useEffect(() => {
         if (feedPostCount > 0) return;
@@ -146,7 +153,7 @@ export const PostsContextProvider = ({ children }: { children: ReactElement }) =
     }, [token, loadUserPosts])
 
     return (
-        <PostsContext.Provider value={{ ...state, uploadPost, deletePost, loadFeedPosts, loadPostById }}>
+        <PostsContext.Provider value={{ ...state, uploadPost, deletePost, loadFeedPosts, loadPostById, resetFeedEnd }}>
             {children}
         </PostsContext.Provider>
     )

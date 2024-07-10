@@ -30,5 +30,6 @@ export interface PostsState {
     loadPostById: (postId: string) => Promise<Post>
     uploadPost: (beforeImage: File, afterImage: File, postDetails: PostDetailsDTO) => void,
     deletePost: (postId: string) => void,
-    loadFeedPosts: (feedPosts: Post[], atFeedEnd: boolean) => void
+    loadFeedPosts: (feedPosts: Post[], atFeedEnd: boolean) => void,
+    resetFeedEnd: () => void;
 }

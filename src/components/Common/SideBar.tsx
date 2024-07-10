@@ -51,7 +51,7 @@ const SideBar = () => {
                 timeout={300}
                 classNames={'search-bar'}
             >
-                <div className={`pt-2 flex flex-col space-y-2 bg-white min-h-screen max-h-full w-[18.5rem] absolute z-40 -translate-x-full px-5 border-r ${isSearchOpen ? 'shadow-right-only' : ''} md:border-r-0 md:shadow-none`}>
+                <div className={`pt-2 flex flex-col space-y-2 bg-white min-h-screen max-h-screen w-[18.5rem] fixed top-0 z-40 -translate-x-full px-5 border-r ${isSearchOpen ? 'shadow-right-only' : ''} md:border-r-0 md:shadow-none`}>
                     <div onClick={() => setIsSearchOpen(false)}><CloseIcon /></div>
 
                     <div className="pt-2 relative mx-auto text-gray-600">
@@ -101,7 +101,7 @@ const SideBar = () => {
 
                 </div>
             </CSSTransition >
-            <div className={`pt-10 md:pl-5 md:pr-5 flex-col space-y-2 flex bg-white min-h-screen max-h-full border-r w-16 md:w-80 items-center md:items-start`}>
+            <div className={`pt-10 md:pl-5 md:pr-5 flex-col space-y-2 sticky flex bg-white h-screen border-r w-16 md:w-80 items-center md:items-start top-0`}>
                 <div className='p-2 text-lg font-semibold hidden md:flex'>
                     OzempicResults.com
                 </div>
