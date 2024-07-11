@@ -93,7 +93,7 @@ const PostContent = (props: { post: Post, onClose?: () => void, clickable?: bool
                     <CloseIcon />
                 </button>}
             </div>
-            <div className="w-full aspect-[3/4] max-h-[500px] relative" >
+            <div className="w-full aspect-[5/6] relative" >
                 <div className="absolute z-30 size-full flex items-center justify-between px-2 overflow-hidden">
                     <button
                         className="w-6 h-6 rounded-full bg-white opacity-70 rotate-90 flex items-center justify-center"
