@@ -1,7 +1,6 @@
-import { useEffect, useRef } from "react"
+import { useEffect } from "react"
 import { usePostsContext } from "../../context/PostsContext"
 import PostContent from "../Posts/PostContent";
-import { useIntersection } from "@mantine/hooks";
 import LoadingSpinner from "../Common/LoadingSpinner";
 import { useReviewsContext } from "../../context/ReviewsContext";
 import ReviewPreview from "../Reviews/ReviewPreview";
@@ -10,7 +9,7 @@ import HomePageSkeleton from "../LoadingSkeletons/HomePageSkeleton";
 import { Post } from "../../utils/contants";
 import SignUpTile from "../Common/SignUpTile";
 import { useUserAuthContext } from "../../context/UserAuthContext";
-import React from "react";
+import { useInView } from "react-intersection-observer";
 
 const HomePage = () => {
 
@@ -24,12 +23,9 @@ const HomePage = () => {
     const { token } = useUserAuthContext();
     const { feedReviews, isLoadingFeedReviews } = useReviewsContext();
 
-    const lastPostRef = useRef<HTMLElement>(null);
-
-    const { ref, entry } = useIntersection({
-        root: lastPostRef.current,
-        threshold: 1
-    })
+    const { ref, inView } = useInView({
+        threshold: 0,
+    });
 
     const Post = (props: { post: Post, ref?: any }) => {
 
@@ -46,32 +42,32 @@ const HomePage = () => {
         if (atFeedEnd) return;
 
         const load = async () => {
-            if (entry?.isIntersecting) {
-                loadFeedPosts(feedPosts, atFeedEnd);
+            if (inView) {
+                loadFeedPosts(feedPosts, false);
             }
         }
         load();
 
-    }, [entry, loadFeedPosts, feedPosts, atFeedEnd])
+    }, [inView])
 
     const isHomePageLoading = (isFeedLoading && feedPosts.length === 0) || isLoadingFeedReviews;
 
     return (
         <>{isHomePageLoading ?
             <HomePageSkeleton /> :
-            <div className="bg-zinc-50 min-h-screen">
+            <div className="bg-zinc-50 min-h-screen size-full">
                 <div className="flex flex-row justify-center pt-5">
-                    <div className="max-w-md  w-full mx-5">
-                        <div className="flex flex-col ml-0 space-y-5 w-full">
+                    <div className="max-w-md w-full mx-5">
+                        <div className="flex flex-col ml-0 space-y-5" >
                             {feedPosts && feedPosts.map((post, index) => {
-                                if (index === feedPosts.length - 1) {
-                                    return (
-                                        <React.Fragment key={post._id}>
-                                            <Post post={post} key={post._id} />
-                                            {!isFeedLoading && !atFeedEnd && <div className="invisible" ref={ref} />}
-                                        </React.Fragment>)
+                                if (index < feedPosts.length - 1) {
+                                    return <Post post={post} key={post._id} />
                                 }
-                                return <Post post={post} key={post._id} />
+                                return (
+                                    <>
+                                        <Post post={post} key={post._id} />
+                                        <div ref={ref} className="h-2"></div>
+                                    </>)
                             })}
                             {isFeedLoading && feedPosts && feedPosts.length > 0 && <div className="w-full p-3">
                                 <div className="w-16 h-16 mx-auto">
